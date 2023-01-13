@@ -82,6 +82,7 @@ class TransformerBackend(ModuleBackend):
     def inference_step(
         self,
         hidden_states: torch.Tensor,
+        attention_masks: torch.Tensor,
         hypo_ids: torch.LongTensor,
         inference_info: InferenceMetadata,
     ) -> Tuple[torch.Tensor, ...]:
@@ -92,7 +93,7 @@ class TransformerBackend(ModuleBackend):
             with self.memory_cache.use_cache(*inference_info.cache_handles) as cache_tensors:
                 self._reorder_cache_inplace(cache_tensors, hypo_ids)
                 layer_past = self._select_layer_past(cache_tensors, inference_info.prefix_length)
-                hidden_states, new_kvs = self.module.forward(hidden_states, layer_past=layer_past, use_cache=True)
+                hidden_states, new_kvs = self.module.forward(hidden_states, attention_mask, layer_past=layer_past, use_cache=True)
                 self._update_cache_inplace(cache_tensors, new_kvs, inference_info.prefix_length)
                 return (hidden_states,)
 
