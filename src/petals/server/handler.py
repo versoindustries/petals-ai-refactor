@@ -134,7 +134,9 @@ class TransformerConnectionHandler(ConnectionHandler):
                 async with self._allocate_cache(requested_backends, batch_size, max_length) as cache_handles:
                     assert len(cache_handles) == len(requested_backends)
                     while request.tensors:  # iterate while user is willing to supply tensors
-                        hidden_states, attention_mask, prompts, hypo_ids = map(deserialize_torch_tensor, request.tensors)
+                        hidden_states, attention_mask, prompts, hypo_ids = map(
+                            deserialize_torch_tensor, request.tensors
+                        )
 
                         # Cast inputs to backend dtype
                         hidden_states = hidden_states.to(requested_backends[0].dtype)
@@ -155,9 +157,11 @@ class TransformerConnectionHandler(ConnectionHandler):
                                 f"Maximum length exceeded: prefix {prefix_length} + current {length_increment}"
                                 f" exceeds pre-allocated maximum {max_length}"
                             )
-                            
+
                         if is_dummy(attention_mask):
-                            attention_mask = torch.ones((hidden_states.shape[0], prefix_length + length_increment), dtype=hypo_ids.dtype)
+                            attention_mask = torch.ones(
+                                (hidden_states.shape[0], prefix_length + length_increment), dtype=hypo_ids.dtype
+                            )
 
                         # run request tensors through all requested modules, update caches
                         for backend, backend_cache_handles, prompt in zip(requested_backends, cache_handles, prompts):
