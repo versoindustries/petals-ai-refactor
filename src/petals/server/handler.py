@@ -163,11 +163,6 @@ class TransformerConnectionHandler(ConnectionHandler):
                                 (hidden_states.shape[0], prefix_length + length_increment), dtype=hypo_ids.dtype
                             )
 
-                        if is_dummy(attention_mask):
-                            attention_mask = torch.ones(
-                                (hidden_states.shape[0], prefix_length + length_increment), dtype=hypo_ids.dtype
-                            )
-
                         # run request tensors through all requested modules, update caches
                         for backend, backend_cache_handles, prompt in zip(requested_backends, cache_handles, prompts):
                             if not is_dummy(prompt):
